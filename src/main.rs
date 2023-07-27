@@ -8,6 +8,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{console, window, Geolocation, Navigator, Position, PositionOptions, PositionError, Window};
 use futures::channel::oneshot;
 use std::sync::{Arc, Mutex};
+use js_sys;
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -79,7 +80,7 @@ pub async fn fetch_bathrooms(_: ()) -> Result<OverpassResponse> {
     let (lat, lon) = coords;
 
     let res = reqwasm::http::Request::get(&format!(
-        "https://overpass-api.de/api/interpreter?data=[out:json];node[\"amenity\"=\"toilets\"](around:5000,{lat},{lon});out;",
+        "https://overpass-api.de/api/interpreter?data=[out:json];node[\"amenity\"=\"toilets\"](around:2000,{lat},{lon});out;",
     ))
     .send()
     .await.unwrap()
@@ -91,12 +92,13 @@ pub async fn fetch_bathrooms(_: ()) -> Result<OverpassResponse> {
 
 pub fn fetch_example(cx: Scope) -> impl IntoView {
     let bathrooms = create_local_resource(cx, || {}, fetch_bathrooms);
-    let current_time = web_sys::window()
-    .unwrap()
-    .Date()
-    .new_0()
-    .unwrap()
-    .to_string();
+    let now = js_sys::Date::now();
+    // let current_time = web_sys::window()
+    // .unwrap()
+    // .Date()
+    // .new_0()
+    // .unwrap()
+    // .to_string();
 
     let fallback = move |cx, errors: RwSignal<Errors>| {
         let error_list = move || {
@@ -133,7 +135,7 @@ pub fn fetch_example(cx: Scope) -> impl IntoView {
                 }).collect_view(cx);
     
                 view! { cx,
-                    // <h1> {format!("Bathrooms around {}, {}", lat, lon)} <
+                    <h1> {format!("Bathrooms accessed at {}", now)} </h1>
                     <table>
                     <thead>
                         <tr>
