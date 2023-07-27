@@ -79,7 +79,7 @@ pub async fn fetch_bathrooms(_: ()) -> Result<OverpassResponse> {
     let (lat, lon) = coords;
 
     let res = reqwasm::http::Request::get(&format!(
-        "https://overpass-api.de/api/interpreter?data=[out:json];node[\"amenity\"=\"toilets\"](around:1000,{lat},{lon});out;",
+        "https://overpass-api.de/api/interpreter?data=[out:json];node[\"amenity\"=\"toilets\"](around:5000,{lat},{lon});out;",
     ))
     .send()
     .await.unwrap()
@@ -91,6 +91,12 @@ pub async fn fetch_bathrooms(_: ()) -> Result<OverpassResponse> {
 
 pub fn fetch_example(cx: Scope) -> impl IntoView {
     let bathrooms = create_local_resource(cx, || {}, fetch_bathrooms);
+    let current_time = web_sys::window()
+    .unwrap()
+    .Date()
+    .new_0()
+    .unwrap()
+    .to_string();
 
     let fallback = move |cx, errors: RwSignal<Errors>| {
         let error_list = move || {
@@ -120,15 +126,24 @@ pub fn fetch_example(cx: Scope) -> impl IntoView {
                                 <a href={format!("https://www.openstreetmap.org/node/{}", element.id)} target="_blank">OSM:{element.id}</a>
                             </td>
                             <td>
-                                <a href={format!("https://www.google.com/maps/dir/?api=1&destination={},{}", element.lat, element.lon)} target="_blank">"Directions"</a>
+                                <a href={format!("https://www.google.com/maps/dir/?api=1&destination={},{}", element.lat, element.lon)} target="_blank">"Open in Google Maps"</a>
                             </td>
                         </tr>
                     }
                 }).collect_view(cx);
     
                 view! { cx,
+                    // <h1> {format!("Bathrooms around {}, {}", lat, lon)} <
                     <table>
+                    <thead>
+                        <tr>
+                            <th>"OSM Node"</th>
+                            <th>"Directions"</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         {bathroom_elements}
+                    </tbody>
                     </table>
                 }
             })
