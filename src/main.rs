@@ -135,7 +135,7 @@ pub fn fetch_example(cx: Scope) -> impl IntoView {
                 }).collect_view(cx);
     
                 view! { cx,
-                    <h1> {format!("Bathrooms accessed at {}", now)} </h1>
+                    <h2> {format!("FREE2PEE: Bathrooms accessed at {}", now)} </h2>
                     <table>
                     <thead>
                         <tr>
